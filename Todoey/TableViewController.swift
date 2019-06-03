@@ -10,7 +10,7 @@ import UIKit
 
 class TableViewController: UITableViewController {
 
-    let itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +19,7 @@ class TableViewController: UITableViewController {
 
     //MARK - Tableview Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return itemArray.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -46,5 +46,33 @@ class TableViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
+    //MARK - Add New Items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        let alert = UIAlertController(title: "Add New ToDoey Item", message: "", preferredStyle: .alert)
+        
+        var inputTextField : UITextField = UITextField()
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (UIAlertAction) in
+            //what will happend once the user click the Add Item Buttom on our UIAlert
+            if inputTextField.text != "" {
+                print("Added new item")
+                self.itemArray.append(inputTextField.text!)
+                self.tableView.reloadData()
+            }
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            inputTextField = alertTextField
+        }
+        
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
+        
+    }
+    
+    
 }
 
