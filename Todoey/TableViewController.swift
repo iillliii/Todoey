@@ -11,10 +11,14 @@ import UIKit
 class TableViewController: UITableViewController {
 
     var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    let userDefalt = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        if let items = userDefalt.array(forKey: "ToDoList") as? [String] {
+            itemArray = items
+        }
     }
 
     //MARK - Tableview Datasource Methods
@@ -58,6 +62,7 @@ class TableViewController: UITableViewController {
             if inputTextField.text != "" {
                 print("Added new item")
                 self.itemArray.append(inputTextField.text!)
+                self.userDefalt.set(self.itemArray, forKey: "ToDoList")
                 self.tableView.reloadData()
             }
         }
