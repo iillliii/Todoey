@@ -10,15 +10,12 @@ import UIKit
 
 class TableViewController: UITableViewController {
 
-    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
-    let userDefalt = UserDefaults.standard
+    var itemArray = [ToDo]()
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("ToDo.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        if let items = userDefalt.array(forKey: "ToDoList") as? [String] {
-            itemArray = items
-        }
+        loadItems()
     }
 
     //MARK - Tableview Datasource Methods
@@ -27,25 +24,21 @@ class TableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+        print("Initialize table view cell")
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
-        
+        cell.textLabel?.text = itemArray[indexPath.row].title
+        cell.accessoryType = itemArray[indexPath.row].check ? .checkmark : .none
+
         return cell
     }
     
     //MARK - TableView Delegate Methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(itemArray[indexPath.row])
         
-        let cell = tableView.cellForRow(at: indexPath)!
+        itemArray[indexPath.row].check = !itemArray[indexPath.row].check
         
-        if cell.accessoryType == .none {
-            cell.accessoryType = .checkmark
-        }else{
-            cell.accessoryType = .none
-        }
+        persist()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -61,9 +54,8 @@ class TableViewController: UITableViewController {
             //what will happend once the user click the Add Item Buttom on our UIAlert
             if inputTextField.text != "" {
                 print("Added new item")
-                self.itemArray.append(inputTextField.text!)
-                self.userDefalt.set(self.itemArray, forKey: "ToDoList")
-                self.tableView.reloadData()
+                self.itemArray.append(ToDo.init(title: inputTextField.text!))
+                self.persist()
             }
         }
         
@@ -78,6 +70,28 @@ class TableViewController: UITableViewController {
         
     }
     
+    func persist(){
+        do{
+            let encoder = PropertyListEncoder()
+            let data = try encoder.encode(itemArray)
+            try data.write(to: self.dataFilePath!)
+        }catch{
+            print("Error enconding item array. \(error)")
+        }
+        self.tableView.reloadData()
+    }
     
+    func loadItems(){
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            print(data)
+            do{
+                itemArray = try decoder.decode([ToDo].self, from: data)
+                
+            }catch{
+                print("Error decoding \(error)")
+            }
+        }
+    }
 }
 
